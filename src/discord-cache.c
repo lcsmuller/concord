@@ -7,12 +7,7 @@
 
 #define DISCORD_EPOCH 1420070400000
 
-static int
-cmp_sf(const void *a, const void *b)
-{
-    if (*(u64snowflake *)a == *(u64snowflake *)b) return 0;
-    return *(u64snowflake *)a > *(u64snowflake *)b ? 1 : -1;
-}
+ANOMAP_DECLARE_COMPARE_FUNCTION(_cmp_sf, u64snowflake)
 
 static int
 _calculate_shard(u64snowflake guild_id, int total_shards)
@@ -269,9 +264,9 @@ discord_cache_enable(struct discord *client,
             struct _discord_shard_cache *cache = &data->caches[i];
             pthread_mutex_init(&cache->lock, NULL);
             cache->guild_map =
-                anomap_create(sizeof(u64snowflake), sizeof(void *), cmp_sf);
+                anomap_create(sizeof(u64snowflake), sizeof(void *), _cmp_sf);
             cache->msg_map =
-                anomap_create(sizeof(u64snowflake), sizeof(void *), cmp_sf);
+                anomap_create(sizeof(u64snowflake), sizeof(void *), _cmp_sf);
         }
         data->garbage_collection_timer = discord_internal_timer(
             client, _on_garbage_collection, NULL, data, 0);
@@ -331,15 +326,14 @@ discord_cache_get_guild(struct discord *client, u64snowflake guild_id)
 {
     if (!client->cache.data) return NULL;
     struct _discord_cache_data *data = client->cache.data;
-    for (int i = 0; i < data->total_shards; i++) {
-        struct _discord_shard_cache *cache = &data->caches[i];
-        struct discord_guild *guild = NULL;
-        pthread_mutex_lock(&cache->lock);
-        anomap_do(cache->guild_map, anomap_getval, &guild_id, &guild);
-        const bool valid = cache->valid;
-        if (guild && valid) (void)discord_claim(client, guild);
-        pthread_mutex_unlock(&cache->lock);
-        if (guild) return valid ? guild : NULL;
-    }
+    struct _discord_shard_cache *cache =
+        &data->caches[_calculate_shard(guild_id, data->total_shards)];
+    struct discord_guild *guild = NULL;
+    pthread_mutex_lock(&cache->lock);
+    anomap_do(cache->guild_map, anomap_getval, &guild_id, &guild);
+    const bool valid = cache->valid;
+    if (guild && valid) (void)discord_claim(client, guild);
+    pthread_mutex_unlock(&cache->lock);
+    if (guild && valid) return guild;
     return NULL;
 }
