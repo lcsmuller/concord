@@ -328,10 +328,13 @@ $ clang myBot.c -o myBot -pthread -ldiscord -lcurl
 #### UNIX C compilers
 ##### This includes the following compilers:
 
-* IBM XL C/C++ (AIX, z/OS, possibly IBM i)
+* IBM XL C/C++ (AIX, z/OS, IBM i)
 * Sun/Oracle Studio (Solaris)
 * IRIX MIPSpro C++ (IRIX) -- NOTE: currently not supported
-* Possibly others!
+* HP aCC (HP-UX)
+* Compaq C (Tru64 UNIX) -- NOTE: also currently not supported
+*Note: if you want to actually compile this on one of the systems listed above, please see the "Compiling on old computers" guide.*
+
 ```console
 $ cc myBot.c -o myBot -ldiscord -lcurl -lpthread
 ```
