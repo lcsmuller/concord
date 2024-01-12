@@ -643,7 +643,7 @@ _ua_conn_set_method(struct ua_conn *conn,
                  logbody, "HTTP_SEND_%s", method_str);
 
     logconf_trace(conf, ANSICOLOR("SEND", ANSI_FG_GREEN) " %s [@@@_%zu_@@@]",
-                  method_str, conn->info.loginfo.counter);
+                  method_str, conn->info.loginfo.rcounter);
 
     /* resets any preexisting CUSTOMREQUEST */
     curl_easy_setopt(conn->ehandle, CURLOPT_CUSTOMREQUEST, NULL);
@@ -749,7 +749,7 @@ ua_info_extract(struct ua_conn *conn, struct ua_info *info)
                                 ANSI_FG_RED) " (%d)%s - %s [@@@_%zu_@@@]",
                       info->httpcode, http_code_print(info->httpcode),
                       http_reason_print(info->httpcode),
-                      info->loginfo.counter);
+                      info->loginfo.rcounter);
 
         info->code = CCORD_HTTP_CODE;
     }
@@ -759,7 +759,7 @@ ua_info_extract(struct ua_conn *conn, struct ua_info *info)
                                 ANSI_FG_RED) " (%d)%s - %s [@@@_%zu_@@@]",
                       info->httpcode, http_code_print(info->httpcode),
                       http_reason_print(info->httpcode),
-                      info->loginfo.counter);
+                      info->loginfo.rcounter);
 
         info->code = CCORD_HTTP_CODE;
     }
@@ -768,7 +768,8 @@ ua_info_extract(struct ua_conn *conn, struct ua_info *info)
                      ANSICOLOR("REDIRECTING",
                                ANSI_FG_YELLOW) " (%d)%s - %s [@@@_%zu_@@@]",
                      info->httpcode, http_code_print(info->httpcode),
-                     http_reason_print(info->httpcode), info->loginfo.counter);
+                     http_reason_print(info->httpcode),
+                     info->loginfo.rcounter);
 
         info->code = CCORD_HTTP_CODE;
     }
@@ -777,7 +778,7 @@ ua_info_extract(struct ua_conn *conn, struct ua_info *info)
             &conn->ua->conf,
             ANSICOLOR("SUCCESS", ANSI_FG_GREEN) " (%d)%s - %s [@@@_%zu_@@@]",
             info->httpcode, http_code_print(info->httpcode),
-            http_reason_print(info->httpcode), info->loginfo.counter);
+            http_reason_print(info->httpcode), info->loginfo.rcounter);
 
         info->code = CCORD_OK;
     }
@@ -786,7 +787,7 @@ ua_info_extract(struct ua_conn *conn, struct ua_info *info)
             &conn->ua->conf,
             ANSICOLOR("INFO", ANSI_FG_GRAY) " (%d)%s - %s [@@@_%zu_@@@]",
             info->httpcode, http_code_print(info->httpcode),
-            http_reason_print(info->httpcode), info->loginfo.counter);
+            http_reason_print(info->httpcode), info->loginfo.rcounter);
 
         info->code = CCORD_HTTP_CODE;
     }

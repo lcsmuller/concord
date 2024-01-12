@@ -112,25 +112,21 @@ logconf_http(struct logconf *conf,
 
         cog_unix_ms_to_iso8601(timestr, sizeof(timestr), tstamp_ms);
 
-        /* Print to output */
-        fprintf(conf->http->f,
-                "%s [%s] - %s - %s\n"
-                "%.*s%s%.*s\n"
-                "@@@_%d_@@@\n",
-                /* 1st LINE ARGS */
-                label, conf->id, timestr, url,
-                /* 2nd LINE ARGS */
-                (int)header.size, header.start, header.size ? "\n" : "",
-                (int)body.size, body.start,
-                /* 3rd LINE ARGS */
-                counter);
-
+        fprintf(conf->http->f, "%s [%s] - %s - %s\n", label, conf->id, timestr,
+                url);
+        if (!conf->intercept_cb
+            || !conf->intercept_cb(conf, &header, &body, label)) {
+            fprintf(conf->http->f, "%.*s%s%.*s\n", (int)header.size,
+                    header.start, header.size ? "\n" : "", (int)body.size,
+                    body.start);
+        }
+        fprintf(conf->http->f, "@@@_%d_@@@\n", counter);
         fflush(conf->http->f);
     }
 
     if (p_info) {
-        p_info->counter = counter;
-        p_info->tstamp_ms = tstamp_ms;
+        p_info->rcounter = counter;
+        p_info->rtstamp_ms = tstamp_ms;
     }
 }
 

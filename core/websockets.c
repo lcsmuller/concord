@@ -96,7 +96,7 @@ _ws_curl_tls_check(
         curl_easy_getinfo(handle, CURLINFO_EFFECTIVE_URL, &url);
 
         logconf_error(&ws->conf, "%s\nLast known URL: %s [@@@_%zu_@@@]",
-                      reason, url, ws->info.loginfo.counter);
+                      reason, url, ws->info.loginfo.rcounter);
 
         _ws_set_status(ws, WS_DISCONNECTED);
     }
@@ -226,7 +226,7 @@ cws_on_connect_cb(void *p_ws, CURL *ehandle, const char *ws_protocols)
         ANSICOLOR(
             "RCV",
             ANSI_FG_YELLOW) " CONNECT (WS-Protocols: '%s') [@@@_%zu_@@@]",
-        ws_protocols, ws->info.loginfo.counter);
+        ws_protocols, ws->info.loginfo.rcounter);
 
     if (ws->cbs.on_connect)
         ws->cbs.on_connect(ws->cbs.data, ws, &ws->info, ws_protocols);
@@ -253,7 +253,7 @@ cws_on_close_cb(void *p_ws,
         &ws->conf,
         ANSICOLOR("RCV",
                   ANSI_FG_YELLOW) " CLOSE(%d) (%zu bytes) [@@@_%zu_@@@]",
-        cwscode, len, ws->info.loginfo.counter);
+        cwscode, len, ws->info.loginfo.rcounter);
 
     if (ws->cbs.on_close)
         ws->cbs.on_close(ws->cbs.data, ws, &ws->info,
@@ -278,7 +278,7 @@ cws_on_text_cb(void *p_ws, CURL *ehandle, const char *text, size_t len)
     logconf_trace(
         &ws->conf,
         ANSICOLOR("RCV", ANSI_FG_YELLOW) " TEXT (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (ws->cbs.on_text)
         ws->cbs.on_text(ws->cbs.data, ws, &ws->info, text, len);
@@ -298,7 +298,7 @@ cws_on_binary_cb(void *p_ws, CURL *ehandle, const void *mem, size_t len)
     logconf_trace(
         &ws->conf,
         ANSICOLOR("RCV", ANSI_FG_YELLOW) " BINARY (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (ws->cbs.on_binary)
         ws->cbs.on_binary(ws->cbs.data, ws, &ws->info, mem, len);
@@ -320,7 +320,7 @@ cws_on_ping_cb(void *p_ws, CURL *ehandle, const char *reason, size_t len)
     logconf_trace(
         &ws->conf,
         ANSICOLOR("RCV", ANSI_FG_YELLOW) " PING (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (ws->cbs.on_ping)
         ws->cbs.on_ping(ws->cbs.data, ws, &ws->info, reason, len);
@@ -342,7 +342,7 @@ cws_on_pong_cb(void *p_ws, CURL *ehandle, const char *reason, size_t len)
     logconf_trace(
         &ws->conf,
         ANSICOLOR("RCV", ANSI_FG_YELLOW) " PONG (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (ws->cbs.on_pong)
         ws->cbs.on_pong(ws->cbs.data, ws, &ws->info, reason, len);
@@ -437,7 +437,7 @@ _ws_close(struct websockets *ws,
             ANSICOLOR("Failed",
                       ANSI_FG_RED) " at SEND CLOSE : Connection already "
                                    "closed [@@@_%zu_@@@]",
-            ws->info.loginfo.counter);
+            ws->info.loginfo.rcounter);
 
         return false;
     }
@@ -447,7 +447,7 @@ _ws_close(struct websockets *ws,
             ANSICOLOR("Failed",
                       ANSI_FG_RED) " at SEND CLOSE : Close already taking "
                                    "place [@@@_%zu_@@@]",
-            ws->info.loginfo.counter);
+            ws->info.loginfo.rcounter);
 
         return false;
     }
@@ -459,7 +459,7 @@ _ws_close(struct websockets *ws,
             &ws->conf,
             ANSICOLOR("Failed",
                       ANSI_FG_RED) " at SEND CLOSE(%d): %s [@@@_%zu_@@@]",
-            code, reason, ws->info.loginfo.counter);
+            code, reason, ws->info.loginfo.rcounter);
 
         return false;
     }
@@ -469,7 +469,7 @@ _ws_close(struct websockets *ws,
 
     logconf_trace(&ws->conf,
                   ANSICOLOR("SEND", ANSI_FG_GREEN) " CLOSE (%s) [@@@_%zu_@@@]",
-                  reason, ws->info.loginfo.counter);
+                  reason, ws->info.loginfo.rcounter);
 
     return true;
 }
@@ -501,15 +501,16 @@ default_on_ping(void *a,
 struct websockets *
 ws_init(struct ws_callbacks *cbs, CURLM *mhandle, struct ws_attr *attr)
 {
-    struct logconf *conf = NULL;
+    struct logconf conf = {};
     struct websockets *new_ws;
 
     if (attr) {
-        conf = attr->conf;
+        conf = *attr->conf;
     }
+    conf.intercept_cb = cbs->on_log_entry;
 
     new_ws = calloc(1, sizeof *new_ws);
-    logconf_branch(&new_ws->conf, conf, "WEBSOCKETS");
+    logconf_branch(&new_ws->conf, attr ? &conf : NULL, "WEBSOCKETS");
 
     if (cbs) new_ws->cbs = *cbs;
     new_ws->mhandle = mhandle;
@@ -575,20 +576,20 @@ ws_send_binary(struct websockets *ws,
     struct logconf_szbuf logheader = { "", 0 };
     struct logconf_szbuf logbody = { (char *)msg, msglen };
 
-    logconf_http(&ws->conf, NULL, ws->base_url, logheader, logbody,
-                 "WS_SEND_BINARY");
+    logconf_http(&ws->conf, &ws->info.loginfo, ws->base_url, logheader,
+                 logbody, "WS_SEND_BINARY");
 
     logconf_trace(
         &ws->conf,
         ANSICOLOR("SEND", ANSI_FG_GREEN) " BINARY (%zu bytes) [@@@_%zu_@@@]",
-        msglen, ws->info.loginfo.counter);
+        msglen, ws->info.loginfo.rcounter);
 
     if (WS_CONNECTED != ws->status) {
         logconf_error(
             &ws->conf,
             ANSICOLOR("Failed", ANSI_FG_RED) " at SEND BINARY : No active "
                                              "connection [@@@_%zu_@@@]",
-            ws->info.loginfo.counter);
+            ws->info.loginfo.rcounter);
         return false;
     }
 
@@ -598,7 +599,7 @@ ws_send_binary(struct websockets *ws,
         logconf_error(
             &ws->conf,
             ANSICOLOR("Failed", ANSI_FG_RED) " at SEND BINARY [@@@_%zu_@@@]",
-            ws->info.loginfo.counter);
+            ws->info.loginfo.rcounter);
         return false;
     }
     return true;
@@ -613,20 +614,20 @@ ws_send_text(struct websockets *ws,
     struct logconf_szbuf logheader = { "", 0 };
     struct logconf_szbuf logbody = { (char *)text, len };
 
-    logconf_http(&ws->conf, NULL, ws->base_url, logheader, logbody,
-                 "WS_SEND_TEXT");
+    logconf_http(&ws->conf, &ws->info.loginfo, ws->base_url, logheader,
+                 logbody, "WS_SEND_TEXT");
 
     logconf_trace(
         &ws->conf,
         ANSICOLOR("SEND", ANSI_FG_GREEN) " TEXT (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (WS_CONNECTED != ws->status) {
         logconf_error(
             &ws->conf,
             ANSICOLOR("Failed", ANSI_FG_RED) " at SEND TEXT : No active "
                                              "connection [@@@_%zu_@@@]",
-            ws->info.loginfo.counter);
+            ws->info.loginfo.rcounter);
 
         return false;
     }
@@ -637,7 +638,7 @@ ws_send_text(struct websockets *ws,
         logconf_error(
             &ws->conf,
             ANSICOLOR("Failed", ANSI_FG_RED) " at SEND TEXT [@@@_%zu_@@@]",
-            ws->info.loginfo.counter);
+            ws->info.loginfo.rcounter);
 
         return false;
     }
@@ -663,7 +664,7 @@ ws_ping(struct websockets *ws,
     logconf_trace(
         &ws->conf,
         ANSICOLOR("SEND", ANSI_FG_GREEN) " PING (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (WS_CONNECTED != ws->status) {
         logconf_error(
@@ -702,7 +703,7 @@ ws_pong(struct websockets *ws,
     logconf_trace(
         &ws->conf,
         ANSICOLOR("SEND", ANSI_FG_GREEN) " PONG (%zu bytes) [@@@_%zu_@@@]",
-        len, ws->info.loginfo.counter);
+        len, ws->info.loginfo.rcounter);
 
     if (WS_CONNECTED != ws->status) {
         logconf_error(

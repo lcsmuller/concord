@@ -173,7 +173,7 @@ discord_gateway_send_identify(struct discord_gateway *gw,
             ANSICOLOR(
                 "SEND",
                 ANSI_FG_BRIGHT_GREEN) " IDENTIFY (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
 
         /* get timestamp for this identify */
         gw->timer->identify_last = gw->timer->now;
@@ -183,7 +183,7 @@ discord_gateway_send_identify(struct discord_gateway *gw,
             &gw->conf,
             ANSICOLOR("FAIL SEND",
                       ANSI_FG_RED) " IDENTIFY (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
 }
 
@@ -214,13 +214,13 @@ discord_gateway_send_resume(struct discord_gateway *gw,
             &gw->conf,
             ANSICOLOR("SEND",
                       ANSI_FG_BRIGHT_GREEN) " RESUME (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
     else {
         logconf_info(&gw->conf,
                      ANSICOLOR("FAIL SEND",
                                ANSI_FG_RED) " RESUME (%d bytes) [@@@_%zu_@@@]",
-                     b.pos, info.loginfo.counter + 1);
+                     b.pos, info.loginfo.rcounter + 1);
     }
 }
 
@@ -271,7 +271,7 @@ discord_gateway_send_heartbeat(struct discord_gateway *gw, int seq)
             ANSICOLOR(
                 "SEND",
                 ANSI_FG_BRIGHT_GREEN) " HEARTBEAT (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
 
         /* update heartbeat timestamp */
         gw->timer->hbeat_last = gw->timer->now;
@@ -285,7 +285,7 @@ discord_gateway_send_heartbeat(struct discord_gateway *gw, int seq)
             &gw->conf,
             ANSICOLOR("FAIL SEND",
                       ANSI_FG_RED) " HEARTBEAT (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
 }
 
@@ -313,7 +313,7 @@ discord_gateway_send_request_guild_members(
             &gw->conf,
             ANSICOLOR("SEND", ANSI_FG_BRIGHT_GREEN) " REQUEST_GUILD_MEMBERS "
                                                     "(%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
     else {
         logconf_info(
@@ -321,7 +321,7 @@ discord_gateway_send_request_guild_members(
             ANSICOLOR(
                 "FAIL SEND",
                 ANSI_FG_RED) " REQUEST_GUILD_MEMBERS (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
 }
 
@@ -352,7 +352,7 @@ discord_gateway_send_update_voice_state(
                 ANSI_FG_BRIGHT_GREEN) " UPDATE_VOICE_STATE "
                                       "(%d bytes): %s channels [@@@_%zu_@@@]",
             b.pos, event->channel_id ? "join" : "leave",
-            info.loginfo.counter + 1);
+            info.loginfo.rcounter + 1);
     }
     else {
         logconf_info(
@@ -360,7 +360,7 @@ discord_gateway_send_update_voice_state(
             ANSICOLOR(
                 "FAIL SEND",
                 ANSI_FG_RED) " UPDATE_VOICE_STATE (%d bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
 }
 
@@ -390,13 +390,13 @@ discord_gateway_send_presence_update(struct discord_gateway *gw,
             &gw->conf,
             ANSICOLOR("SEND", ANSI_FG_BRIGHT_GREEN) " PRESENCE UPDATE (%d "
                                                     "bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
     else {
         logconf_error(
             &gw->conf,
             ANSICOLOR("FAIL SEND", ANSI_FG_RED) " PRESENCE UPDATE (%d "
                                                 "bytes) [@@@_%zu_@@@]",
-            b.pos, info.loginfo.counter + 1);
+            b.pos, info.loginfo.rcounter + 1);
     }
 }

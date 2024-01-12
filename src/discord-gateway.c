@@ -414,6 +414,67 @@ _ws_on_close(void *p_gw,
             gw->session->status & DISCORD_SESSION_RESUMABLE);
 }
 
+/**
+ * @brief hide bot token from log entries
+ *
+ * @todo improve readability
+ */
+static bool
+_ws_on_log_entry(const struct logconf *conf,
+                 const struct logconf_szbuf *header,
+                 const struct logconf_szbuf *body,
+                 const char label[])
+{
+    // skip if there is no text to be parsed
+    if (!strstr(label, "WS_SEND_TEXT") && !strstr(label, "WS_RCV_TEXT"))
+        return false;
+
+    bool intercepted = false;
+
+    jsmn_parser parser;
+    jsmntok_t *toks = NULL;
+    unsigned num_tokens = 0;
+
+    jsmn_init(&parser);
+    if (jsmn_parse_auto(&parser, body->start, body->size, &toks, &num_tokens)
+        <= 0)
+        return false;
+
+    jsmnf_loader loader;
+    jsmnf_pair *pairs = NULL;
+    unsigned num_pairs = 0;
+
+    jsmnf_init(&loader);
+    if (jsmnf_load_auto(&loader, body->start, toks, num_tokens, &pairs,
+                        &num_pairs)
+        <= 0)
+        goto _free_toks;
+
+    char *path[] = { "d", "token" };
+    jsmnf_pair *f;
+    if (!(f = jsmnf_find_path(pairs, body->start, path,
+                              sizeof(path) / sizeof *path)))
+        goto _free_pairs;
+
+    fprintf(conf->http->f, "%.*s%s%.*s<<REDACTED>>%.*s\n",
+            // print header
+            (int)header->size, header->start, header->size ? "\n" : "",
+            // print all text up until "token":
+            f->v.pos, body->start,
+            // print everything else (but skip token's value)
+            (int)body->size - (f->v.pos + (int)f->v.len),
+            body->start + (f->v.pos + (int)f->v.len));
+
+    intercepted = true;
+
+_free_pairs:
+    free(pairs);
+_free_toks:
+    free(toks);
+
+    return intercepted;
+}
+
 static bool
 _discord_gateway_payload_from_json(struct discord_gateway_payload *payload,
                                    const char text[],
@@ -479,7 +540,7 @@ _ws_on_text(void *p_gw,
                   ANSI_FG_BRIGHT_YELLOW) " %s%s%s (%zu bytes) [@@@_%zu_@@@]",
         _discord_gateway_opcode_print(gw->payload.opcode),
         *gw->payload.name ? " -> " : "", gw->payload.name, len,
-        info->loginfo.counter);
+        info->loginfo.rcounter);
 
     switch (gw->payload.opcode) {
     case DISCORD_GATEWAY_DISPATCH:
@@ -536,7 +597,8 @@ discord_gateway_init(struct discord_gateway *gw,
     struct ws_callbacks cbs = { .data = gw,
                                 .on_connect = &_ws_on_connect,
                                 .on_text = &_ws_on_text,
-                                .on_close = &_ws_on_close };
+                                .on_close = &_ws_on_close,
+                                .on_log_entry = &_ws_on_log_entry };
     /* Web-Sockets custom attributes */
     struct ws_attr attr = { .conf = conf };
 

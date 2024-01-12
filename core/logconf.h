@@ -206,6 +206,15 @@ struct logconf_szbuf {
     size_t size;
 };
 
+struct logconf;
+
+/** @brief Intercept logging entries for logging customization and filtering
+ *      purposes */
+typedef _Bool (*logconf_intercept_cb)(const struct logconf *conf,
+                                      const struct logconf_szbuf *header,
+                                      const struct logconf_szbuf *body,
+                                      const char label[]);
+
 /**
  * @brief A stackful and modularized wrapper over the popular 'log.c'
  * facilities
@@ -231,6 +240,9 @@ struct logconf {
     /** log.c main structure (shared with branches) */
     log_Logger *L;
 
+    /** intercept log entry callback */
+    logconf_intercept_cb intercept_cb;
+
     struct {
         /** name of logging output file */
         char *fname;
@@ -245,12 +257,12 @@ struct logconf {
     } disable_modules;
 };
 
-/** @brief Store logging information from log_http() */
+/** @brief Store logging information from logconf_http() */
 struct loginfo {
-    /** log count */
-    size_t counter;
-    /** log timestamp */
-    uint64_t tstamp_ms;
+    /** readable log count */
+    size_t rcounter;
+    /** readable log timestamp */
+    uint64_t rtstamp_ms;
 };
 
 /**
