@@ -6,14 +6,30 @@
  * @ingroup DiscordConstants
  *  @{ */
 
+/** indicates if an app uses the Auto Moderation API */
+PP_DEFINE(DISCORD_APPLICATION_APPLICATION_AUTO_MODERATION_RULE_CREATE_BADGE 1 << 6)
+/**	intent required for bots in 100 or more servers to
+      receive presence_update events */
 PP_DEFINE(DISCORD_APPLICATION_GATEWAY_PRESENCE 1 << 12)
+/** intent required for bots in under 100 servers to receive
+      presence_update events */
 PP_DEFINE(DISCORD_APPLICATION_GATEWAY_PRESENCE_LIMITED 1 << 13)
+/** intent required for bots in 100 or more servers to receive
+      member-related events like guild_member_add */
 PP_DEFINE(DISCORD_APPLICATION_GATEWAY_GUILD_MEMBERS 1 << 14)
+/** intent required for bots in under 100 servers to receive
+      member-related events like guild_member_add */
 PP_DEFINE(DISCORD_APPLICATION_GATEWAY_GUILD_MEMBERS_LIMITED 1 << 15)
+/** indicates unusual growth of an app that prevents verification */
 PP_DEFINE(DISCORD_APPLICATION_VERIFICATION_PENDING_GUILD_LIMIT 1 << 16)
+/** indicates if an app is embedded within the Discord client */
 PP_DEFINE(DISCORD_APPLICATION_EMBEDDED 1 << 17)
+/** intent required for bots in 100 or more servers to receive message content */
 PP_DEFINE(DISCORD_APPLICATION_GATEWAY_MESSAGE_CONTENT 1 << 18)
+/** intent required for bots in under 100 servers to receive message content */
 PP_DEFINE(DISCORD_APPLICATION_GATEWAY_MESSAGE_CONTENT_LIMITED 1 << 19)
+/** indicates if an app has registered global application commands */
+PP_DEFINE(DISCORD_APPLICATION_APPLICATION_COMMAND_BADGE 1 << 23)
 
 /** @} DiscordApplicationFlags */
 
@@ -45,8 +61,7 @@ PUB_STRUCT(discord_application)
   COND_WRITE(self->owner != NULL)
     FIELD_STRUCT_PTR(owner, discord_user, *)
   COND_END
-  /** if this application is a game sold on Discord, this field will be the
-       summary field for the store page of its primary sku */
+  /** @deprecated will be removed in API v11 */
     FIELD_PTR(summary, char, *)
   /** the hex encoded key for verification in interactions and the GameSDK's
        GetTicket */
@@ -59,6 +74,10 @@ PUB_STRUCT(discord_application)
   /** if this application is a game sold on Discord, this field will be the
        guild to which it has been linked */
     FIELD_SNOWFLAKE(guild_id)
+  /** Partial object of the associated guild */
+  COND_WRITE(self->guild != NULL)
+    FIELD_STRUCT_PTR(guild, discord_guild, *)
+  COND_END
   /** if this application is a game sold on Discord, this field will be the
        ID of the \"Game SKU\" that is created, if exists */
     FIELD_SNOWFLAKE(primary_sku_id)
@@ -69,6 +88,12 @@ PUB_STRUCT(discord_application)
     FIELD_PTR(cover_image, char, *)
   /** the application's public flags @see DiscordApplicationFlags */
     FIELD_BITMASK(flags)
+  /** Approximate count of guilds the app has been added to */
+    FIELD(guild_count, size_t, 0)
+  /** Array of redirect URIs for the app */
+  COND_WRITE(self->redirect_uris != NULL)
+    FIELD_STRUCT_PTR(redirect_uris, strings, *)
+  COND_END
 STRUCT_END
 #endif
 

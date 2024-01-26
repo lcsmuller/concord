@@ -18,14 +18,22 @@ PUB_STRUCT(discord_emoji)
     FIELD_STRUCT_PTR(user, discord_user, *)
   COND_END
   /** whether this emoji must be wrapped in colons */
+  COND_WRITE(self->require_colons != false)
     FIELD(require_colons, bool, false)
+  COND_END
   /** whether this emoji is managed */
+  COND_WRITE(self->managed != false)
     FIELD(managed, bool, false)
+  COND_END
   /** whether this emoji is animated */
+  COND_WRITE(self->animated != false)
     FIELD(animated, bool, false)
+  COND_END
   /** whether this emoji can be used, may be false due to loss of Server
        Boosts */
+  COND_WRITE(self->available != false)
     FIELD(available, bool, false)
+  COND_END
 STRUCT_END
 #endif
 
@@ -53,9 +61,7 @@ PUB_STRUCT(discord_create_guild_emoji)
   /** the 128x128 emoji image */
     FIELD_PTR(image, char, *)
   /** roles allowed to use this emoji */
-  COND_WRITE(self->roles != NULL)
     FIELD_STRUCT_PTR(roles, snowflakes, *)
-  COND_END
 STRUCT_END
 #endif
 
@@ -68,9 +74,6 @@ PUB_STRUCT(discord_modify_guild_emoji)
 #endif
   /** name of the emoji */
     FIELD_PTR(name, char, *)
-  /* TODO: implement base64 encoding */
-  /** the 128x128 emoji image */
-    FIELD_PTR(image, char, *)
   /** roles allowed to use this emoji */
   COND_WRITE(self->roles != NULL)
     FIELD_STRUCT_PTR(roles, snowflakes, *)

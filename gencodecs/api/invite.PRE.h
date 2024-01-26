@@ -38,10 +38,13 @@ PUB_STRUCT(discord_invite)
     FIELD_STRUCT_PTR(target_application, discord_application, *)
   COND_END
   /** approximate count of online members */
+  COND_WRITE(self->approximate_presence_count != 0)
     FIELD(approximate_presence_count, int, 0)
+  COND_END
   /** approximate count of total members */
+  COND_WRITE(self->approximate_member_count != 0)
     FIELD(approximate_member_count, int, 0)
-  /* TODO: nullable */
+  COND_END
   /** the expiration date of this invite */
   COND_WRITE(self->expires_at != 0)
     FIELD_TIMESTAMP(expires_at)
@@ -77,18 +80,14 @@ STRUCT(discord_invite_metadata)
   /** whether this invite only grants temporary membership */
     FIELD(temporary, bool, false)
   /** when this invite was created */
-  COND_WRITE(self->created_at != 0)
     FIELD_TIMESTAMP(created_at)
-  COND_END
 STRUCT_END
 #endif
 
 #if GENCODECS_RECIPE & (DATA | JSON)
 STRUCT(discord_invite_stage_instance)
   /** the members speaking in the Stage */
-  COND_WRITE(self->members != NULL)
     FIELD_STRUCT_PTR(members, discord_guild_members, *)
-  COND_END
   /** the number of users in the Stage */
     FIELD(participant_count, int, 0)
   /** the number of users speaking in the Stage */
@@ -106,9 +105,13 @@ STRUCT_END
 #if GENCODECS_RECIPE & (DATA | JSON)
 PUB_STRUCT(discord_get_invite)
   /** whether the invite should contain approximate member counts */
+  COND_WRITE(self->with_counts != false)
     FIELD(with_counts, bool, false)
+  COND_END
   /** whether the invite should contain the expiration date */
+  COND_WRITE(self->with_expiration != false)
     FIELD(with_expiration, bool, false)
+  COND_END
   /** the guild scheduled event to include with the invite */
   COND_WRITE(self->guild_scheduled_event_id != 0)
     FIELD_SNOWFLAKE(guild_scheduled_event_id)

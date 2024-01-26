@@ -23,11 +23,11 @@ PUB_STRUCT(discord_stage_instance)
   /** the topic of the Stage instance (1-120 characters) */
     FIELD_PTR(topic, char, *)
   /** the privacy level of the stage instance */
-  COND_WRITE(self->privacy_level != 0)
     FIELD_ENUM(privacy_level, discord_privacy_level)
-  COND_END
   /** whether or not stage discovery is disabled @deprecated deprecated field */
     FIELD(discoverable_disabled, bool, false)
+  /** the id of the scheduled event for this Stage instance */
+    FIELD_SNOWFLAKE(guild_scheduled_event_id)
 STRUCT_END
 #endif
 
@@ -56,6 +56,14 @@ PUB_STRUCT(discord_create_stage_instance)
   COND_WRITE(self->privacy_level != 0)
     FIELD_ENUM(privacy_level, discord_privacy_level)
   COND_END
+  /** notify @everyone that a Stage instance has started */
+  COND_WRITE(self->send_start_notification != false)
+    FIELD(send_start_notification, bool, false)
+  COND_END
+  /** the id of the scheduled event for this Stage instance */
+  COND_WRITE(self->guild_scheduled_event_id != 0)
+    FIELD_SNOWFLAKE(guild_scheduled_event_id)
+  COND_END
 STRUCT_END
 #endif
 
@@ -67,7 +75,9 @@ PUB_STRUCT(discord_modify_stage_instance)
     FIELD_PTR(reason, char, *)
 #endif
   /** the topic of the Stage instance (1-120 characters) */
+  COND_WRITE(self->topic != NULL)
     FIELD_PTR(topic, char, *)
+  COND_END
   /** the privacy level of the stage instance */
   COND_WRITE(self->privacy_level != 0)
     FIELD_ENUM(privacy_level, discord_privacy_level)

@@ -11,7 +11,15 @@ ENUM(discord_component_types)
   /** a select menu for picking from choices */
     ENUMERATOR(DISCORD_COMPONENT_SELECT_MENU, = 3)
   /** a text input object */
-    ENUMERATOR_LAST(DISCORD_COMPONENT_TEXT_INPUT, = 4)
+    ENUMERATOR(DISCORD_COMPONENT_TEXT_INPUT, = 4)
+  /** a select menu for users */
+    ENUMERATOR(DISCORD_COMPONENT_USER_SELECT, = 5)
+  /** a select menu for roles */
+    ENUMERATOR(DISCORD_COMPONENT_ROLE_SELECT, = 6)
+  /** a select menu for mentionables (users and roles) */
+    ENUMERATOR(DISCORD_COMPONENT_MENTION_SELECT, = 7)
+  /** a select menu for channels */
+    ENUMERATOR_LAST(DISCORD_COMPONENT_CHANNEL_SELECT, = 8)
 ENUM_END
 #endif
 
@@ -40,13 +48,9 @@ ENUM_END
 #if GENCODECS_RECIPE & (DATA | JSON)
 PUB_STRUCT(discord_component)
   /** component type */
-  COND_WRITE(self->type != 0)
     FIELD_ENUM(type, discord_component_types)
-  COND_END
   /** a developer-defined identifier for the component, max 100 characters */
     FIELD_PTR(custom_id, char, *)
-  /** whether the component is disabled, default `false` */
-    FIELD(disabled, bool, false)
   /** one of button or text styles */
   COND_WRITE(self->style != 0)
     FIELD_ENUM(style, discord_component_styles)
@@ -86,6 +90,10 @@ PUB_STRUCT(discord_component)
     FIELD(required, bool, false)
   /** a pre-filled value for this component */
     FIELD_PTR(value, char, *)
+  /** whether the component is disabled, default `false` */
+  COND_WRITE(self->disabled != false)
+    FIELD(disabled, bool, false)
+  COND_END
 STRUCT_END
 #endif
 
@@ -103,7 +111,9 @@ STRUCT(discord_select_option)
   /** the dev-define value of the option, max 100 characters */
     FIELD_PTR(value, char, *)
   /** an additional description of the option, max 100 characters */
+  COND_WRITE(self->description != NULL)
     FIELD_PTR(description, char, *)
+  COND_END
   /** `id`, `name`, and `animated` */
   COND_WRITE(self->emoji != NULL)
     FIELD_STRUCT_PTR(emoji, discord_emoji, *)

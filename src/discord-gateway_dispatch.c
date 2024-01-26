@@ -45,6 +45,8 @@ static const struct {
     [DISCORD_EV_GUILD_CREATE] = INIT(discord_guild),
     [DISCORD_EV_GUILD_UPDATE] = INIT(discord_guild),
     [DISCORD_EV_GUILD_DELETE] = INIT(discord_guild),
+    [DISCORD_EV_GUILD_AUDIT_LOG_ENTRY_CREATE] =
+        INIT(discord_audit_log_entry),
     [DISCORD_EV_GUILD_BAN_ADD] = INIT(discord_guild_ban_add),
     [DISCORD_EV_GUILD_BAN_REMOVE] = INIT(discord_guild_ban_remove),
     [DISCORD_EV_GUILD_EMOJIS_UPDATE] = INIT(discord_guild_emojis_update),

@@ -296,6 +296,16 @@ discord_set_on_guild_delete(struct discord *client,
 }
 
 void
+discord_set_on_guild_audit_log_entry_create(
+    struct discord *client,
+    void (*cb)(struct discord *client,
+               const struct discord_audit_log_entry *event))
+{
+    ASSIGN_CB(DISCORD_EV_GUILD_AUDIT_LOG_ENTRY_CREATE, cb);
+    discord_add_intents(client, DISCORD_GATEWAY_GUILDS);
+}
+
+void
 discord_set_on_guild_ban_add(
     struct discord *client,
     void (*cb)(struct discord *client,

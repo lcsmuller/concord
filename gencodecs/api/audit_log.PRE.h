@@ -55,18 +55,30 @@ ENUM(discord_audit_log_events)
     ENUMERATOR(DISCORD_AUDIT_LOG_AUTO_MODERATION_RULE_CREATE, = 140)
     ENUMERATOR(DISCORD_AUDIT_LOG_AUTO_MODERATION_RULE_UPDATE, = 141)
     ENUMERATOR(DISCORD_AUDIT_LOG_AUTO_MODERATION_RULE_DELETE, = 142)
-    ENUMERATOR_LAST(DISCORD_AUDIT_LOG_AUTO_MODERATION_BLOCK_MESSAGE, = 143)
+    ENUMERATOR(DISCORD_AUDIT_LOG_AUTO_MODERATION_BLOCK_MESSAGE, = 143)
+    ENUMERATOR(DISCORD_AUDIT_LOG_AUTO_MODERATION_FLAG_TO_CHANNEL, = 144)
+    ENUMERATOR(DISCORD_AUDIT_LOG_AUTO_MODERATION_USER_COMMUNICATION_DISABLED, = 145)
+    ENUMERATOR(DISCORD_AUDIT_LOG_CREATOR_MONETIZATION_REQUEST_CREATED, = 150)
+    ENUMERATOR_LAST(DISCORD_AUDIT_LOG_CREATOR_MONETIZATION_TERMS_ACCEPTED, = 151)
 ENUM_END
 #endif
 
 /** @CCORD_pub_struct{discord_audit_log} */
 #if GENCODECS_RECIPE & (DATA | JSON)
 PUB_STRUCT(discord_audit_log)
-  /** list of audit log entries */
+  /** list of application commands referenced in the audit log */
+  COND_WRITE(self->application_commands != NULL)
+    FIELD_STRUCT_PTR(application_commands, discord_application_commands, *)
+  COND_END
+  /** list of audit log entries referenced in the audit log */
   COND_WRITE(self->audit_log_entries != NULL)
     FIELD_STRUCT_PTR(audit_log_entries, discord_audit_log_entries, *)
   COND_END
-  /** list of guild scheduled events found in the audit log */
+  /** list of auto moderation rules referenced in the audit log */
+  COND_WRITE(self->auto_moderation_rules != NULL)
+    FIELD_STRUCT_PTR(auto_moderation_rules, discord_auto_moderation_rules, *)
+  COND_END
+  /** list of guild scheduled events referenced in the audit log */
   COND_WRITE(self->guild_scheduled_events != NULL)
     FIELD_STRUCT_PTR(guild_scheduled_events, discord_guild_scheduled_events, *)
   COND_END
@@ -89,8 +101,9 @@ PUB_STRUCT(discord_audit_log)
 STRUCT_END
 #endif
 
+/** @CCORD_pub_struct{discord_audit_log_entry} */
 #if GENCODECS_RECIPE & (DATA | JSON)
-STRUCT(discord_audit_log_entry)
+PUB_STRUCT(discord_audit_log_entry)
   /** ID of the affected entity (webhook, user, role, etc.) */
     FIELD_SNOWFLAKE(target_id)
   /** changes made to the target_id */
@@ -122,6 +135,12 @@ LIST_END
 
 #if GENCODECS_RECIPE & (DATA | JSON)
 STRUCT(discord_optional_audit_entry_info)
+  /** ID of the app whose permissions were targeted */
+    FIELD_SNOWFLAKE(application_id)
+  /** Name of the Auto Moderation rule that was triggered */
+    FIELD_PTR(auto_moderation_rule_name, char, *)
+  /** Trigger type of the Auto Moderation rule that was triggered */
+    FIELD_PTR(auto_moderation_rule_trigger_type, char, *)
   /** channel in which the entities were targeted */
     FIELD_SNOWFLAKE(channel_id)
   /** number of entities that were targeted */
@@ -138,6 +157,8 @@ STRUCT(discord_optional_audit_entry_info)
     FIELD_PTR(role_name, char, *)
   /** type of overwritten entity - 0 for role or 1 for \"member\" */
     FIELD_PTR(type, char, *)
+  /** The type of integration which performed the action */
+    FIELD_PTR(integration_type, char, *)
 STRUCT_END
 #endif
 
@@ -171,11 +192,17 @@ LIST_END
 #if GENCODECS_RECIPE == DATA
 STRUCT(discord_get_guild_audit_log)
   /** filter the log for actions made by a user */
+  COND_WRITE(self->user_id != 0)
     FIELD_SNOWFLAKE(user_id)
+  COND_END
   /** the type of audit log event */
+  COND_WRITE(self->action_type != 0)
     FIELD(action_type, int, 0)
+  COND_END
   /** filter the log before a certain entry ID */
+  COND_WRITE(self->before != 0)
     FIELD_SNOWFLAKE(before)
+  COND_END
   /** how many entries are returned (default 50, minimum 1, maximum 100) */
   COND_WRITE(self->limit >= 1 && self->limit <= 100)
     FIELD(limit, int, 50)

@@ -86,6 +86,7 @@ enum discord_gateway_events {
     DISCORD_EV_GUILD_CREATE,
     DISCORD_EV_GUILD_UPDATE,
     DISCORD_EV_GUILD_DELETE,
+    DISCORD_EV_GUILD_AUDIT_LOG_ENTRY_CREATE,
     DISCORD_EV_GUILD_BAN_ADD,
     DISCORD_EV_GUILD_BAN_REMOVE,
     DISCORD_EV_GUILD_EMOJIS_UPDATE,
@@ -512,6 +513,18 @@ void discord_set_on_guild_delete(
     struct discord *client,
     void (*callback)(struct discord *client,
                      const struct discord_guild *event));
+
+/**
+ * @brief Triggers when an audit log entry is created
+ * @note This implicitly sets @ref DISCORD_GATEWAY_GUILDS intent
+ *
+ * @param client the client created with discord_init()
+ * @param callback the callback to be triggered on event
+ */
+void discord_set_on_guild_audit_log_entry_create(
+    struct discord *client,
+    void (*callback)(struct discord *client,
+                     const struct discord_audit_log_entry *event));
 
 /**
  * @brief Triggers when a user is banned from a guild
