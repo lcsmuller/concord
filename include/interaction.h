@@ -35,14 +35,14 @@ CCORDcode discord_create_interaction_response(
  * @param client the client created with discord_init()
  * @param application_id the unique id of the application
  * @param interaction_token the unique token of the interaction
- * @CCORD_ret_obj{ret,interaction_response}
+ * @CCORD_ret_obj{ret,interaction}
  * @CCORD_return
  */
 CCORDcode discord_get_original_interaction_response(
     struct discord *client,
     u64snowflake application_id,
     const char interaction_token[],
-    struct discord_ret_interaction_response *ret);
+    struct discord_ret_message *ret);
 
 /**
  * @brief Edit the initial Interaction response

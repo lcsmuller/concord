@@ -945,7 +945,9 @@ PUB_STRUCT(discord_create_message)
   /** the message contents (up to 2000 characters) */
     FIELD_PTR(content, char, *)
   /** true if this is a TTS message */
+  COND_WRITE(self->tts != false)
     FIELD(tts, bool, false)
+  COND_END
   /** embedded `rich` content (up to 6000 characters) */
     FIELD_STRUCT_PTR(embeds, discord_embeds, *)
   /** allowed mentions for the message */
@@ -972,6 +974,11 @@ PUB_STRUCT(discord_create_message)
        `SUPPRESS_EMBEDS` can be set) */
   COND_WRITE(self->flags != 0)
     FIELD_BITMASK(flags)
+  COND_END
+  /** If true and nonce is present, it will be checked for
+       uniqueness in the past few minutes. */
+  COND_WRITE(self->enforce_nonce != false)
+    FIELD(enforce_nonce, bool, false)
   COND_END
 STRUCT_END
 #endif

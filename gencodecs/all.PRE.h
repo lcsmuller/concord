@@ -6,6 +6,7 @@
 #include "invite.PRE.h"
 #include "channel.PRE.h"
 #include "emoji.PRE.h"
+#include "entitlements.PRE.h"
 #include "guild.PRE.h"
 #include "guild_scheduled_event.PRE.h"
 #include "guild_template.PRE.h"
@@ -18,6 +19,7 @@
 #include "gateway.PRE.h"
 #include "oauth2.PRE.h"
 #include "permissions.PRE.h"
+#include "poll.PRE.h"
 #include "teams.PRE.h"
 #include "voice_connections.PRE.h"
 

@@ -6,6 +6,15 @@
  * @ingroup DiscordConstants
  *  @{ */
 
+#if GENCODECS_RECIPE == DATA
+ENUM(discord_application_integration_types)
+  /** app is installable to servers */
+    ENUMERATOR(DISCORD_APPLICATIONS_GUILD_INSTALL, = 0)
+  /** App is installable to users */
+    ENUMERATOR_LAST(DISCORD_APPLICATIONS_USER_INSTALL, = 1)
+ENUM_END
+#endif
+
 /** indicates if an app uses the Auto Moderation API */
 PP_DEFINE(DISCORD_APPLICATION_APPLICATION_AUTO_MODERATION_RULE_CREATE_BADGE 1 << 6)
 /**	intent required for bots in 100 or more servers to

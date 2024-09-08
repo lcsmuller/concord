@@ -154,12 +154,16 @@ PUB_STRUCT(discord_modify_guild_sticker)
     FIELD_PTR(description, char, *)
   /** autocomplete/suggestion tags for the sticker (max 200 characters) */
     FIELD_PTR(tags, char, *)
+  /** @CCORD_reason{reason} */
+    FIELD_PTR(reason, char, *)
 STRUCT_END
 #endif
 
 #if GENCODECS_RECIPE == DATA
 STRUCT(discord_delete_guild_sticker)
   /** @CCORD_reason{reason} */
+#if GENCODECS_RECIPE == DATA
     FIELD_PTR(reason, char, *)
+#endif
 STRUCT_END
 #endif

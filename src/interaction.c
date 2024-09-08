@@ -49,7 +49,7 @@ discord_get_original_interaction_response(
     struct discord *client,
     u64snowflake application_id,
     const char interaction_token[],
-    struct discord_ret_interaction_response *ret)
+    struct discord_ret_message *ret)
 {
     struct discord_attributes attr = { 0 };
 
@@ -57,7 +57,7 @@ discord_get_original_interaction_response(
     CCORD_EXPECT(client, NOT_EMPTY_STR(interaction_token), CCORD_BAD_PARAMETER,
                  "");
 
-    DISCORD_ATTR_INIT(attr, discord_interaction_response, ret, NULL);
+    DISCORD_ATTR_INIT(attr, discord_message, ret, NULL);
 
     return discord_rest_run(&client->rest, &attr, NULL, HTTP_GET,
                             "/webhooks/%" PRIu64 "/%s/messages/@original",

@@ -42,7 +42,7 @@ LIST_END
  * **************************************************************************/
 
 /** @CCORD_pub_struct{discord_create_stage_instance} */
-#if GENCODECS_RECIPE & (DATA | JSON_DECODER)
+#if GENCODECS_RECIPE & (DATA | JSON)
 PUB_STRUCT(discord_create_stage_instance)
   /** @CCORD_reason{reason} */
 #if GENCODECS_RECIPE == DATA
@@ -68,7 +68,7 @@ STRUCT_END
 #endif
 
 /** @CCORD_pub_struct{discord_modify_stage_instance} */
-#if GENCODECS_RECIPE & (DATA | JSON_DECODER)
+#if GENCODECS_RECIPE & (DATA | JSON)
 PUB_STRUCT(discord_modify_stage_instance)
   /** @CCORD_reason{reason} */
 #if GENCODECS_RECIPE == DATA
