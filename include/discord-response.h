@@ -184,4 +184,9 @@ DISCORD_RETURN(guild_application_command_permissions);
 DISCORD_RETURN(interaction_response);
 /** @} DiscordAPIInteractionsReact */
 
+/** @addtogroup DiscordAPIPolls
+ * @{ */
+DISCORD_RETURN(poll_answer_voters);
+/** @} DiscordAPIPolls */
+
 #endif /* DISCORD_RESPONSE_H */

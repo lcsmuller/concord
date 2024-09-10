@@ -96,6 +96,7 @@ CCORDcode discord_modify_guild_sticker(
 CCORDcode discord_delete_guild_sticker(struct discord *client,
                                        u64snowflake guild_id,
                                        u64snowflake sticker_id,
+                                       struct discord_delete_guild_sticker *params,
                                        struct discord_ret *ret);
 
 /** @} DiscordAPISticker */

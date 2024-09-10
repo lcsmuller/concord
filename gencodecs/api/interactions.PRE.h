@@ -2,6 +2,7 @@
  * Interactions Datatypes
  * **************************************************************************/
 
+/* TODO: add comments */
 #if GENCODECS_RECIPE == DATA
 ENUM(discord_interaction_types)
     ENUMERATOR(DISCORD_INTERACTION_PING, = 1)
@@ -9,6 +10,17 @@ ENUM(discord_interaction_types)
     ENUMERATOR(DISCORD_INTERACTION_MESSAGE_COMPONENT, = 3)
     ENUMERATOR(DISCORD_INTERACTION_APPLICATION_COMMAND_AUTOCOMPLETE, = 4)
     ENUMERATOR_LAST(DISCORD_INTERACTION_MODAL_SUBMIT, = 5)
+ENUM_END
+#endif
+
+#if GENCODECS_RECIPE == DATA
+ENUM(discord_interaction_context_types)
+  /** interaction can be used within servers */
+    ENUMERATOR(DISCORD_INTERACTION_GUILD, = 1)
+  /** interaction can be used within DMs with the app's bot user */
+    ENUMERATOR(DISCORD_INTERACTION_BOT_DM, = 2)
+  /** interaction can be used within Group DMs and DMs other than the app's bot user */
+    ENUMERATOR_LAST(DISCORD_INTERACTION_PRIVATE_CHANNEL, = 3)
 ENUM_END
 #endif
 
@@ -29,7 +41,10 @@ ENUM(discord_interaction_callback_types)
   /** respond to an autocomplete interaction with suggested choices */
     ENUMERATOR(DISCORD_INTERACTION_APPLICATION_COMMAND_AUTOCOMPLETE_RESULT, = 8)
   /** respond to an interaction with a popup modal */
-    ENUMERATOR_LAST(DISCORD_INTERACTION_MODAL, = 9)
+    ENUMERATOR(DISCORD_INTERACTION_MODAL, = 9)
+  /** respond to an interaction with an upgrade button,
+       only available for apps with monetization enabled */
+  ENUMERATOR_LAST(DISCORD_INTERACTION_PREMIUM_REQUIRED, = 10)
 ENUM_END
 #endif
 
@@ -46,6 +61,8 @@ PUB_STRUCT(discord_interaction)
     FIELD_STRUCT_PTR(data, discord_interaction_data, *)
   /** the guild it was sent from */
     FIELD_SNOWFLAKE(guild_id)
+  /** partial channel object that the interaction was sent from */
+    FIELD_STRUCT_PTR(channel, discord_channel, *)
   /** the channel it was sent from */
     FIELD_SNOWFLAKE(channel_id)
   /** guild member data for the invoking user, including permissions */
@@ -58,15 +75,28 @@ PUB_STRUCT(discord_interaction)
     FIELD(version, int, 1)
   /** for components, the message they were attached to */
     FIELD_STRUCT_PTR(message, discord_message, *)
+  /** bitwise set of permissions the app has in the source location
+       of the interaction */
+    FIELD_PTR(app_permissions, char, *)
   /** the selected language of the invoking user */
     FIELD_PTR(locale, char, *)
   /** the guild preferred locale, if invoked in a guild */
     FIELD_PTR(guild_locale, char, *)
+  /** for monetized apps, any entitlements for the invoking user,
+       representing access to premium SKUs */
+  COND_WRITE(self->entitlements != NULL)
+    FIELD_STRUCT_PTR(entitlements, discord_entitlements, *)
+  COND_END
+  /* TODO: Add "authorizing_integration_owners" -- What do they mean with dictionary? */
+  /** context where the interaction was triggered from */
+  FIELD_ENUM(context, discord_interaction_context_types)
 STRUCT_END
 #endif
 
 #if GENCODECS_RECIPE & (DATA | JSON)
 STRUCT(discord_interaction_data)
+  /** Those are always present for application commands: */
+
   /** the ID of the invoked command */
     FIELD_SNOWFLAKE(id)
   /** the name of the invoked command */
@@ -74,19 +104,37 @@ STRUCT(discord_interaction_data)
   /** the type of the invoked command */
     FIELD_ENUM(type, discord_application_command_types)
   /** converted users + roles + channels + attachments */
+  COND_WRITE(self->resolved != NULL)
     FIELD_STRUCT_PTR(resolved, discord_resolved_data, *)
+  COND_END
   /** the params + values from the user */
+  COND_WRITE(self->options != NULL)
     FIELD_STRUCT_PTR(options, discord_application_command_interaction_data_options, *)
+  COND_END
+  /** the id of the guild the command is registered to */
+    FIELD_SNOWFLAKE(guild_id)
+  /** the ID of the user or messaged targetted by a user or message command */
+    FIELD_SNOWFLAKE(target_id)
+
+  /** Those are always present for select menu components: */
+
   /** the custom_id of the component */
+  COND_WRITE(self->custom_id != NULL)
     FIELD_PTR(custom_id, char, *)
+  COND_END
   /** the type of the component */
     FIELD_ENUM(component_type, discord_component_types)
   /** the values the user selected */
+  COND_WRITE(self->values != NULL)
     FIELD_STRUCT_PTR(values, strings, *)
-  /** the ID of the user or messaged targetted by a user or message command */
-    FIELD_SNOWFLAKE(target_id)
+  COND_END
+
+  /** This is always present for model submits: */
+
   /** the values submitted by the user */
+  COND_WRITE(self->components != NULL)
     FIELD_STRUCT_PTR(components, discord_components, *)
+  COND_END
 STRUCT_END
 #endif
 
@@ -140,7 +188,9 @@ STRUCT(discord_interaction_callback_data)
   COND_WRITE(self->components != NULL)
     FIELD_STRUCT_PTR(components, discord_components, *)
   COND_END
-  /* MESSAGES */
+
+  /* Those are only available for Messages: */
+
   /** is the response TTS */
   COND_WRITE(self->tts != false)
     FIELD(tts, bool, false)

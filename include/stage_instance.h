@@ -66,6 +66,7 @@ CCORDcode discord_modify_stage_instance(
  */
 CCORDcode discord_delete_stage_instance(struct discord *client,
                                         u64snowflake channel_id,
+                                        struct discord_delete_stage_instance *params,
                                         struct discord_ret *ret);
 
 /** @} DiscordAPIStageInstance */

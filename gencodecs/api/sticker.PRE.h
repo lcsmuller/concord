@@ -35,17 +35,21 @@ PUB_STRUCT(discord_sticker)
     FIELD_PTR(description, char, *)
   /** autocomplete/suggestion tags for the sticker (max 200 characters) */
     FIELD_PTR(tags, char, *)
-  /** type of sticker */
-  COND_WRITE(self->type != 0)
-    FIELD_ENUM(type, discord_sticker_types)
+  /** the sticker asset hash, now an empty string @deprecated deprecated field */
+  COND_WRITE(self->asset != NULL)
+    FIELD_PTR(asset, char, *)
   COND_END
+  /** type of sticker */
+    FIELD_ENUM(type, discord_sticker_types)
   /** type of sticker format */
   COND_WRITE(self->format_type != 0)
     FIELD_ENUM(format_type, discord_sticker_format_types)
   COND_END
   /** whether this guild sticker can be used, may be false due to loss of
        Server Boosts */
+  COND_WRITE(self->available != false)
     FIELD(available, bool, false)
+  COND_END
   /** ID of the guild that owns this sticker */
   COND_WRITE(self->guild_id != 0)
     FIELD_SNOWFLAKE(guild_id)
@@ -73,9 +77,7 @@ STRUCT(discord_sticker_item)
   /** name of the sticker */
     FIELD_PTR(name, char, *)
   /** type of sticker format */
-  COND_WRITE(self->format_type != 0)
     FIELD_ENUM(format_type, discord_sticker_format_types)
-  COND_END
 STRUCT_END
 #endif
 
@@ -90,9 +92,7 @@ STRUCT(discord_sticker_pack)
   /** ID of the sticker */
     FIELD_SNOWFLAKE(id)
   /** the stickers in the pack */
-  COND_WRITE(self->stickers != NULL)
     FIELD_STRUCT_PTR(stickers, discord_stickers, *)
-  COND_END
   /** name of the sticker pack */
     FIELD_PTR(name, char, *)
   /** ID of the pack's SKU */
@@ -154,12 +154,16 @@ PUB_STRUCT(discord_modify_guild_sticker)
     FIELD_PTR(description, char, *)
   /** autocomplete/suggestion tags for the sticker (max 200 characters) */
     FIELD_PTR(tags, char, *)
+  /** @CCORD_reason{reason} */
+    FIELD_PTR(reason, char, *)
 STRUCT_END
 #endif
 
 #if GENCODECS_RECIPE == DATA
 STRUCT(discord_delete_guild_sticker)
   /** @CCORD_reason{reason} */
+#if GENCODECS_RECIPE == DATA
     FIELD_PTR(reason, char, *)
+#endif
 STRUCT_END
 #endif

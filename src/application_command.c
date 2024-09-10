@@ -37,8 +37,10 @@ discord_create_global_application_command(
     CCORD_EXPECT(client, application_id != 0, CCORD_BAD_PARAMETER, "");
     CCORD_EXPECT(client, params != NULL, CCORD_BAD_PARAMETER, "");
     CCORD_EXPECT(client, NOT_EMPTY_STR(params->name), CCORD_BAD_PARAMETER, "");
-    CCORD_EXPECT(client, NOT_EMPTY_STR(params->description),
-                 CCORD_BAD_PARAMETER, "");
+    if (params->type != 2 && params->type != 3) {
+      CCORD_EXPECT(client, NOT_EMPTY_STR(params->description),
+                   CCORD_BAD_PARAMETER, "");
+    }
 
     DISCORD_ATTR_INIT(attr, discord_application_command, ret, NULL);
 
@@ -174,8 +176,10 @@ discord_create_guild_application_command(
     CCORD_EXPECT(client, guild_id != 0, CCORD_BAD_PARAMETER, "");
     CCORD_EXPECT(client, params != NULL, CCORD_BAD_PARAMETER, "");
     CCORD_EXPECT(client, NOT_EMPTY_STR(params->name), CCORD_BAD_PARAMETER, "");
-    CCORD_EXPECT(client, NOT_EMPTY_STR(params->description),
-                 CCORD_BAD_PARAMETER, "");
+    if (params->type != 2 && params->type != 3) {
+      CCORD_EXPECT(client, NOT_EMPTY_STR(params->description),
+                   CCORD_BAD_PARAMETER, "");
+    }
 
     body.size = discord_create_guild_application_command_to_json(
         buf, sizeof(buf), params);

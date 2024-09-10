@@ -97,9 +97,7 @@ STRUCT(discord_guild_scheduled_event_user)
   /** the scheduled event ID which the user subscribed to */
     FIELD_SNOWFLAKE(guild_scheduled_event_id)
   /** user which subscribed to an event */
-  COND_WRITE(self->user != NULL)
     FIELD_STRUCT_PTR(user, discord_user, *)
-  COND_END
   /** guild member data for this user for the guild which this event belongs
        to, if any */
   COND_WRITE(self->member != NULL)
@@ -144,13 +142,9 @@ PUB_STRUCT(discord_create_guild_scheduled_event)
   /** the name of the scheduled event */
     FIELD_PTR(name, char, *)
   /** the privacy level of the scheduled event */
-  COND_WRITE(self->privacy_level != 0)
     FIELD_ENUM(privacy_level, discord_guild_scheduled_event_privacy_level)
-  COND_END
   /** the time the scheduled event will start */
-  COND_WRITE(self->scheduled_start_time != 0)
     FIELD_TIMESTAMP(scheduled_start_time)
-  COND_END
   /** the time the scheduled event will end */
   COND_WRITE(self->scheduled_end_time != 0)
     FIELD_TIMESTAMP(scheduled_end_time)
@@ -160,13 +154,9 @@ PUB_STRUCT(discord_create_guild_scheduled_event)
     FIELD_PTR(description, char, *)
   COND_END
   /** the entity type of the scheduled event */
-  COND_WRITE(self->entity_type != 0)
     FIELD_ENUM(entity_type, discord_guild_scheduled_event_entity_types)
-  COND_END
   /** the cover image of the scheduled event */
-  COND_WRITE(self->image != NULL)
     FIELD_PTR(image, char, *)
-  COND_END
 STRUCT_END
 #endif
 
@@ -193,7 +183,13 @@ PUB_STRUCT(discord_modify_guild_scheduled_event)
     FIELD_STRUCT_PTR(entity_metadata, discord_guild_scheduled_event_entity_metadata, *)
   COND_END
   /** the name of the scheduled event */
+  COND_WRITE(self->name != NULL)
     FIELD_PTR(name, char, *)
+  COND_END
+  /** the privacy level of the scheduled event */
+  COND_WRITE(self->privacy_level != 0)
+    FIELD_ENUM(privacy_level, discord_guild_scheduled_event_privacy_level)
+  COND_END
   /** the time the scheduled event will start */
   COND_WRITE(self->scheduled_start_time != 0)
     FIELD_TIMESTAMP(scheduled_start_time)
@@ -224,9 +220,13 @@ STRUCT_END
 #if GENCODECS_RECIPE == DATA
 STRUCT(discord_get_guild_scheduled_event_users)
   /** number of users to return (up to maximum of 100) */
+  COND_WRITE(self->limit != 0)
     FIELD(limit, int, 0)
+  COND_END
   /** include guild member data if exists */
+  COND_WRITE(self->with_member != false)
     FIELD(with_member, bool, false)
+  COND_END
   /** consider only users before given user ID */
   COND_WRITE(self->before != 0)
     FIELD_SNOWFLAKE(before)
