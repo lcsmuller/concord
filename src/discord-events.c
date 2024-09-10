@@ -213,7 +213,7 @@ discord_set_on_channel_pins_update(
 void
 discord_set_on_thread_create(struct discord *client,
                              void (*cb)(struct discord *client,
-                                        const struct discord_channel *event))
+                                        const struct discord_thread_create *event))
 {
     ASSIGN_CB(DISCORD_EV_THREAD_CREATE, cb);
     discord_add_intents(client, DISCORD_GATEWAY_GUILDS);

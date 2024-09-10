@@ -413,7 +413,7 @@ void discord_set_on_channel_pins_update(
 void discord_set_on_thread_create(
     struct discord *client,
     void (*callback)(struct discord *client,
-                     const struct discord_channel *event));
+                     const struct discord_thread_create *event));
 
 /**
  * @brief Triggers when a thread is updated
