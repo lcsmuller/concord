@@ -328,14 +328,13 @@ _discord_on_heartbeat_ack(struct discord_gateway *gw)
 static void
 _ws_on_connect(void *p_gw,
                struct websockets *ws,
-               struct ws_info *info,
-               const char *ws_protocols)
+               struct ws_info *info)
 {
     (void)ws;
     (void)info;
     struct discord_gateway *gw = p_gw;
 
-    logconf_info(&gw->conf, "Connected, WS-Protocols: '%s'", ws_protocols);
+    logconf_info(&gw->conf, "Connected");
 }
 
 static void
@@ -765,11 +764,11 @@ discord_gateway_start(struct discord_gateway *gw)
     if (gw->session->status & DISCORD_SESSION_RESUMABLE
         && *gw->session->resume_url)
     {
-        ws_set_url(gw->ws, gw->session->resume_url, NULL);
+        ws_set_url(gw->ws, gw->session->resume_url);
         *gw->session->resume_url = '\0';
     }
     else {
-        ws_set_url(gw->ws, gw->session->base_url, NULL);
+        ws_set_url(gw->ws, gw->session->base_url);
     }
 
 #ifndef CCORD_DEBUG_WEBSOCKETS

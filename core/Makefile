@@ -4,14 +4,12 @@ OBJS = cog-utils.o      \
        io_poller.o      \
        user-agent.o     \
        websockets.o     \
-       curl-websocket.o \
        jsmn-find.o      \
        json-build.o     \
        log.o            \
        logconf.o        \
        priority_queue.o \
        anomap.o         \
-       sha1.o           \
        threadpool.o     \
        queriec.o
 

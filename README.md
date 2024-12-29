@@ -108,7 +108,10 @@ int main(void) {
 
 ## Build Instructions
 
-The only dependency is `curl-7.56.1` or higher. If you are compiling libcurl from source, you will need to build it with SSL support.
+The only dependency is `curl-7.86.0` or higher. If you are compiling libcurl from source, you will need to build it with SSL support.
+
+> [!NOTE]
+> Not all installations of libcurl has websocket support enabled. If your system packager's libcurl does not have support it, you will need to compile libcurl from source with the `--enable-websocket` flag.
 
 ### On Windows
 

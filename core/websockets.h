@@ -75,13 +75,10 @@ enum ws_close_reason {
 struct ws_callbacks {
     /**
      * @brief Called upon connection
-     *
-     * @note It is not validated if matches the proposed protocols.
      */
     void (*on_connect)(void *data,
                        struct websockets *ws,
-                       struct ws_info *info,
-                       const char *protocols);
+                       struct ws_info *info);
 
     /**
      * @brief Reports UTF-8 text messages.
@@ -190,11 +187,9 @@ void ws_cleanup(struct websockets *ws);
  *
  * @param ws the WebSockets handle created with ws_init()
  * @param base_url the URL to connect, such as ws://echo.websockets.org
- * @param ws_protocols NULL or something like "chat", "superchat",...
  */
 void ws_set_url(struct websockets *ws,
-                const char base_url[],
-                const char ws_protocols[]);
+                const char base_url[]);
 
 /**
  * @brief Send a binary message of given size.

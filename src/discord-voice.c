@@ -784,7 +784,7 @@ start_voice_ws_thread(void *p_vc)
 
         if (vc->is_redirect) {
             memcpy(vc->token, vc->new_token, sizeof(vc->token));
-            ws_set_url(vc->ws, vc->new_url, NULL);
+            ws_set_url(vc->ws, vc->new_url);
             vc->is_redirect = false;
             vc->reconnect.attempt = 0;
             vc->reconnect.enable = true;
@@ -858,7 +858,7 @@ _discord_on_voice_server_update(struct discord *client,
         pthread_t tid;
 
         memcpy(vc->token, vc->new_token, sizeof(vc->new_token));
-        ws_set_url(vc->ws, vc->new_url, NULL);
+        ws_set_url(vc->ws, vc->new_url);
 
         /** TODO: replace with a threadpool */
         if (pthread_create(&tid, NULL, &start_voice_ws_thread, vc))

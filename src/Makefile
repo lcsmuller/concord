@@ -11,14 +11,12 @@ CORE_OBJS     = $(CORE_DIR)/cog-utils.o      \
                 $(CORE_DIR)/io_poller.o      \
                 $(CORE_DIR)/user-agent.o     \
                 $(CORE_DIR)/websockets.o     \
-                $(CORE_DIR)/curl-websocket.o \
                 $(CORE_DIR)/jsmn-find.o      \
                 $(CORE_DIR)/json-build.o     \
                 $(CORE_DIR)/log.o            \
                 $(CORE_DIR)/logconf.o        \
                 $(CORE_DIR)/priority_queue.o \
                 $(CORE_DIR)/anomap.o         \
-                $(CORE_DIR)/sha1.o           \
                 $(CORE_DIR)/threadpool.o     \
                 $(CORE_DIR)/queriec.o
 GENCODECS_OBJ = $(GENCODECS_DIR)/discord_codecs.o
