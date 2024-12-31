@@ -10,6 +10,8 @@
 enum io_poller_events {
   IO_POLLER_IN  = 1 << 0,
   IO_POLLER_OUT = 1 << 1,
+  IO_POLLER_PRI = 1 << 2,
+  IO_POLLER_ERR = 1 << 3,
 };
 
 /**

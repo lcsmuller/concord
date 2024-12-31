@@ -29,6 +29,7 @@ extern "C" {
 #include "queue.h"
 #include "priority_queue.h"
 #include "attributes.h"
+#include "anomap.h"
 
 /** @brief Return 1 if string isn't considered empty */
 #define NOT_EMPTY_STR(str) ((str) && *(str))
@@ -493,7 +494,7 @@ struct discord_requestor {
          *      their callbacks to be called from the main thread
          */
         QUEUE(struct discord_request) finished;
-    } * queues;
+    } *queues;
 
     /** queue locks */
     struct {
@@ -503,7 +504,7 @@ struct discord_requestor {
         pthread_mutex_t pending;
         /** finished queue lock */
         pthread_mutex_t finished;
-    } * qlocks;
+    } *qlocks;
 };
 
 /**
@@ -785,7 +786,7 @@ struct discord_gateway {
         int ping_ms;
         /** ping rwlock  */
         pthread_rwlock_t rwlock;
-    } * timer;
+    } *timer;
 
     /** the identify structure for client authentication */
     struct discord_identify id;
@@ -943,17 +944,9 @@ void discord_gateway_dispatch(struct discord_gateway *gw);
 struct discord_refcounter {
     /** `DISCORD_REFCOUNT` logging module */
     struct logconf conf;
-    /** amount of individual user's data held for automatic cleanup */
-    int length;
-    /** cap before increase */
-    int capacity;
-    /**
-     * individual user's data held for automatic cleanup
-     * @note datatype declared at discord-refcount.c
-     */
-    struct _discord_ref *refs;
-    /** global lock */
-    pthread_mutex_t *g_lock;
+
+    struct anomap *maps[16];
+    pthread_mutex_t locks[16];
 };
 
 /**
@@ -975,10 +968,15 @@ void discord_refcounter_init(struct discord_refcounter *rc,
  *      no longer referenced
  * @param should_free whether `data` cleanup should be followed by a free()
  */
-void discord_refcounter_add_internal(struct discord_refcounter *rc,
-                                     void *data,
-                                     void (*cleanup)(void *data),
-                                     bool should_free);
+#define discord_refcounter_add_internal(refcounter, data, cleanup,            \
+                                        should_free)                          \
+    __discord_refcounter_add_internal(refcounter, __func__, data, cleanup,    \
+                                      should_free)
+void __discord_refcounter_add_internal(struct discord_refcounter *rc,
+                                       const char *name,
+                                       void *data,
+                                       void (*cleanup)(void *data),
+                                       bool should_free);
 
 /**
  * @brief Add a new client reference to the reference counter
@@ -989,11 +987,15 @@ void discord_refcounter_add_internal(struct discord_refcounter *rc,
  *      no longer referenced
  * @param should_free whether `data` cleanup should be followed by a free()
  */
-void discord_refcounter_add_client(struct discord_refcounter *rc,
-                                   void *data,
-                                   void (*cleanup)(struct discord *client,
-                                                   void *data),
-                                   bool should_free);
+#define discord_refcounter_add_client(refcounter, data, cleanup, should_free) \
+    __discord_refcounter_add_client(refcounter, __func__, data, cleanup,      \
+                                    should_free)
+void __discord_refcounter_add_client(struct discord_refcounter *rc,
+                                     const char *name,
+                                     void *data,
+                                     void (*cleanup)(struct discord *client,
+                                                     void *data),
+                                     bool should_free);
 
 /**
  * @brief Cleanup refcounter and all user data currently held
@@ -1244,7 +1246,7 @@ struct discord {
         pthread_mutex_t lock;
         /** notify of `count` decrement */
         pthread_cond_t cond;
-    } * workers;
+    } *workers;
 
 #ifdef CCORD_VOICE
     struct discord_voice *vcs;

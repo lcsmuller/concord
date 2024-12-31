@@ -3,6 +3,7 @@
 #include <curl/curl.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <poll.h>
 #include <sys/ioctl.h>
 
@@ -71,36 +72,35 @@ ccord_global_init()
             goto fail_pipe_init;
         }
         for (int i = 0; i < 2; i++) {
-            const int on = 1;
-
-            #ifdef FIOCLEX
-                if (0 != ioctl(shutdown_fds[i], FIOCLEX, NULL)) {
-                    fputs("Failed to make shutdown pipe close on execute\n",
-                        stderr);
-                    goto fail_pipe_init;
-                }
-            #endif
-
-            if (0 != ioctl(shutdown_fds[i], (int)FIONBIO, &on)) {
+#ifdef FIOCLEX
+            if (0 != ioctl(shutdown_fds[i], FIOCLEX, NULL)) {
+                fputs("Failed to make shutdown pipe close on execute\n",
+                      stderr);
+                goto fail_pipe_flags;
+            }
+#endif
+            int flags = fcntl(shutdown_fds[i], F_GETFL) | O_NONBLOCK;
+            if (0 != fcntl(shutdown_fds[i], F_SETFL, flags)) {
                 fputs("Failed to make shutdown pipe nonblocking\n", stderr);
-                goto fail_pipe_init;
+                goto fail_pipe_flags;
             }
         }
     }
     pthread_mutex_unlock(&lock);
     return CCORD_OK;
 
-fail_pipe_init:
+fail_pipe_flags:
     for (int i = 0; i < 2; i++) {
         if (-1 != shutdown_fds[i]) {
             close(shutdown_fds[i]);
             shutdown_fds[i] = -1;
         }
     }
-fail_discord_worker_init:
+fail_pipe_init:
     discord_worker_global_cleanup();
-fail_curl_init:
+fail_discord_worker_init:
     curl_global_cleanup();
+fail_curl_init:
 
     init_counter = 0;
     pthread_mutex_unlock(&lock);
@@ -128,16 +128,14 @@ discord_dup_shutdown_fd(void)
     int fd = -1;
     if (-1 == shutdown_fds[0]) return -1;
     if (-1 != (fd = dup(shutdown_fds[0]))) {
-        const int on = 1;
-
-        #ifdef FIOCLEX
-            if (0 != ioctl(fd, FIOCLEX, NULL)) {
-                close(fd);
-                return -1;
-            }
-        #endif
-
-        if (0 != ioctl(fd, (int)FIONBIO, &on)) {
+#ifdef FIOCLEX
+        if (0 != ioctl(fd, FIOCLEX, NULL)) {
+            close(fd);
+            return -1;
+        }
+#endif
+        int flags = fcntl(fd, F_GETFL) | O_NONBLOCK;
+        if (0 != fcntl(fd, F_SETFL, flags)) {
             close(fd);
             return -1;
         }

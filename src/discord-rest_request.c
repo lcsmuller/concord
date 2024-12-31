@@ -392,7 +392,8 @@ discord_requestor_info_read(struct discord_requestor *rqtor)
                                   body.start);
                 }
                 else if (req->dispatch.has_type
-                         && req->dispatch.sync != DISCORD_SYNC_FLAG) {
+                         && req->dispatch.sync != DISCORD_SYNC_FLAG)
+                {
                     if (req->dispatch.sync) {
                         req->response.data = req->dispatch.sync;
                     }
